@@ -1,0 +1,16 @@
+#cells {
+  margin: 0 auto;
+  position: relative;
+}
+#cells .cell{
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 14px 14px 10px;
+  width: 190px;
+  position: absolute;
+}
+#cells .cell img {
+  display: block;
+  vertical-align: bottom;
+  border: 0 none;
+}
