@@ -3,14 +3,31 @@
   position: relative;
 }
 #cells .cell{
+  position: absolute;
+  display: inline-block;
+  width: 190px;
   background: #fff;
   border: 1px solid #ddd;
-  padding: 14px 14px 10px;
-  width: 190px;
-  position: absolute;
+  padding: 14px;
 }
 #cells .cell img {
   display: block;
-  vertical-align: bottom;
   border: 0 none;
+}
+#cells .cell:hover {
+  box-shadow: 0 0 10px #aaa;
+}
+.pending {
+  opacity: 0;
+  -webkit-transform: translateY(50px);
+  -moz-transform: translateY(50px);
+  -o-transform: translateY(50px);
+  transform: translateY(50px);
+}
+
+.ready {
+  -webkit-transition: opacity 1s ease-in-out, box-shadow 300ms ease-in-out, left 700ms ease-in-out, top 700ms ease-in-out, -webkit-transform 700ms ease-in-out;
+  -moz-transition: opacity 1s ease-in-out, box-shadow 300ms ease-in-out, left 700ms ease-in-out, top 700ms ease-in-out, -moz-transform 700ms ease-in-out;
+  -o-transition: opacity 1s ease-in-out, box-shadow 300ms ease-in-out, left 700ms ease-in-out, top 700ms ease-in-out, -o-transform 700ms ease-in-out;
+  transition: opacity 1s ease-in-out, box-shadow 300ms ease-in-out, left 700ms ease-in-out, top 700ms ease-in-out, transform 700ms ease-in-out;
 }

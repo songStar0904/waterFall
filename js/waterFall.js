@@ -1,21 +1,22 @@
 
 	'user strict';
 	// 惰性载入兼容绑定函数
-	var addEvent = (function(el, type, callback){
-		if (el.addEventListener) {
-			return function(el, type, callback) {
-				el.addEventListener(type, callback, false);
-			}
-		} else if (el.attachEvent) {
-			return function(el, type, callback) {
-				el.attachEvent('on' + type, callback);
-			}
-		} else {
-			return function(el, type, callback) {
-				el[on + 'type'] = callback;
-			}
-		}
-	});
+	var addEvent = function(element, type, handler) {
+	    if(element.addEventListener) {
+	      addEvent = function(element, type, handler) {
+	        element.addEventListener(type, handler, false);
+	      };
+	    } else if(element.attachEvent) {
+	      addEvent = function(element, type, handler) {
+	        element.attachEvent('on' + type, handler);
+	      };
+	    } else {
+	      addEvent = function(element, type, handler) {
+	        element['on' + type] = handler;
+	    };
+    }
+      addEvent(element, type, handler);
+    };
 	var ajax = function(type, url, params, callback) {
 		if (!callback) {
 			callback = params;
@@ -48,6 +49,10 @@
 	}
 	function WaterFall(){
 		this.columnHeights; //计算高度数组
+		this.managing = false;
+		this.scrollDelay = null;
+		this.resizeDelay = null;
+		this.count;
 		this.opt = {
 			 width: 190, // 图片宽度
 			 padding: 15, //cell 的内边距
@@ -59,19 +64,14 @@
 		this.init();
 	};
 	WaterFall.prototype = {
-		init: function(){
-			var count = this.getColumnCount();
-			this.resetHeight(count);
-			this.appendCell(count * 2);
-		},
 		// 获得每排能放图片的最大数量
 	    getColumnCount: function(){
 	    	return Math.max(1, Math.floor((document.body.offsetWidth + this.opt.gap_width) / (this.opt.width + this.opt.gap_width)));
 	    },
 	    // 预加载图片
-		preLoadImg: function(img, callback) {
-			// var img = new Image();
-			// img.src = src;
+		preLoadImg: function(src, callback) {
+			var img = new Image();
+			img.src = src;
 			if (!!window.ActiveXObject) {
 				// ie
 				img.onrendystatechange = function(){
@@ -82,7 +82,7 @@
 			} else {
 				// 非ie
 				img.onload = function() {
-					callback();
+					callback(img.width, img.height);
 				}
 			}
 		},
@@ -98,20 +98,21 @@
 	    	var min_index, min_height, style, img_height, img;
 	    	console.log(this.columnHeights)
 	    	for (var i = 0, len = cells.length; i < len; i++) {
-	    		min_height = Math.min.apply(null, this.columnHeights);
-		    	min_index = this.columnHeights.indexOf(min_height);
-		    	console.log(cells[i], min_height)
 		    	img = cells[i].getElementsByTagName('img')[0];
 		    	img.width = this.opt.width;
 		    	((i) => {
-		    		this.preLoadImg(img, () =>{
-			    		img_height = img.offsetHeight;
+		    		this.preLoadImg(img.src, (width, height) =>{
+		    			cells[i].className = 'cell ready';
+		    			min_height = Math.min.apply(null, this.columnHeights);
+		    	        min_index = this.columnHeights.indexOf(min_height);
+			    		img_height = parseInt(height * this.opt.width/width);
 			    		console.log(img_height, this.columnHeights, min_index)
 			    		style = cells[i].style;
-				    	style.height = (img_height + this.opt.padding) + 'px';
+				    	style.height = img_height + 'px';
 				    	style.top = min_height + 'px';
-				    	style.left = (i * this.cell_width) + 'px';
-				    	this.columnHeights[min_index] = this.columnHeights[min_index] + img_height + this.opt.gap_height;
+				    	style.left = (min_index * this.cell_width) + 'px';
+				    	this.columnHeights[min_index] += img_height + this.opt.gap_height + this.opt.padding * 2;
+				    	(this.cells.style.height = Math.max.apply(null, this.columnHeights) + 'px');
 			    	})
 			    })(i);
 	    	}
@@ -119,7 +120,7 @@
 	    appendCell: function(count) {
 	    	var fragment = document.createDocumentFragment();
 	    	var cells = [], cell, images, image;
-	    	jsonp('http://api.douban.com/v2/movie/top250',{start: 0, count}, (res) =>{
+	    	jsonp('http://api.douban.com/v2/movie/top250',{start: this.start, count}, (res) =>{
 	    		images = res.subjects;
 	    		console.log(images)
 	    		for (var i = 0, len = images.length; i < len; i++) {
@@ -131,10 +132,26 @@
 	    			cell.className = 'cell pending';
 	    			cells.push(cell);
 	    			fragment.append(cell)
+	    			this.start += count;
 	    		}
 	    		this.cells.appendChild(fragment);
 	    		this.adjustCell(cells)
 	    	})
-	    }
+	    },
+	    manageCells: function(){
+	    	if (this.cells.getBoundingClientRect().bottom < this.cells.offsetHeight) {
+	    		this.appendCell(this.count * 2);
+	    	}
+	    },
+	    delayScroll: function(){
+	    	clearTimeout(this.scrollDelay);
+	    	this.scrollDelay = setTimeout(this.manageCells, 500);
+	    },
+	    init: function(){
+			this.count = this.getColumnCount();
+			this.resetHeight(this.count);
+			this.appendCell(this.count * 2);
+			addEvent(window, 'scroll', this.delayScroll);
+		}
 
 	}
