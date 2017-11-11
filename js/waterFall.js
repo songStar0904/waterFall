@@ -143,15 +143,23 @@
 	    		this.appendCell(this.count * 2);
 	    	}
 	    },
+	    reflowCells: function(){
+
+	    },
 	    delayScroll: function(){
 	    	clearTimeout(this.scrollDelay);
 	    	this.scrollDelay = setTimeout(this.manageCells, 500);
+	    },
+	    delayResize: ()=>{
+	    	clearTimeout(this.resizeDelay);
+	    	this.resizeDelay = setTimeout(this.reflowCells, 500);
 	    },
 	    init: function(){
 			this.count = this.getColumnCount();
 			this.resetHeight(this.count);
 			this.appendCell(this.count * 2);
 			addEvent(window, 'scroll', this.delayScroll);
+			addEvent(window, 'resize', this.delayResize);
 		}
 
 	}
