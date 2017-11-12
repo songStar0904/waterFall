@@ -125,10 +125,10 @@
 	    appendCell: function(count) {
 	    	var fragment = document.createDocumentFragment();
 	    	var cells = [], cell, images, image;
-	    	// 跨域使用 jsonp('http://api.douban.com/v2/movie/top250',{start: this.start, count}, (res) =>{
-	    	// images = res.subjects;
-	    	ajax('get', 'http://120.77.174.93/dbmovie?start=' + this.start + '&count=' + count, (res) =>{
-	    		images = res;
+	    	jsonp('https://api.douban.com/v2/movie/top250',{start: this.start, count}, (res) =>{
+	    	    images = res.subjects;
+	    	// ajax('get', 'http://120.77.174.93/dbmovie?start=' + this.start + '&count=' + count, (res) =>{
+	    	// 	images = res;
 	    		for (var i = 0, len = images.length; i < len; i++) {
 	    			cell = document.createElement('div');
 	    			image = document.createElement('img');
