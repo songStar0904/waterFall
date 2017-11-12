@@ -1,7 +1,7 @@
-
+(function(){
 	'user strict';
 	// 惰性载入兼容绑定函数
-	var addEvent = function(element, type, handler) {
+	var addEvent = function(element, type, handler, ec) {
 	    if(element.addEventListener) {
 	      addEvent = function(element, type, handler) {
 	        element.addEventListener(type, handler, false);
@@ -53,6 +53,7 @@
 		this.scrollDelay = null;
 		this.resizeDelay = null;
 		this.count;
+		this.start = 0;
 		this.opt = {
 			 width: 190, // 图片宽度
 			 padding: 15, //cell 的内边距
@@ -66,7 +67,9 @@
 	WaterFall.prototype = {
 		// 获得每排能放图片的最大数量
 	    getColumnCount: function(){
-	    	return Math.max(1, Math.floor((document.body.offsetWidth + this.opt.gap_width) / (this.opt.width + this.opt.gap_width)));
+	    	let opt = this.opt;
+	    	// 左一图片没有坐外边距 所以要加一个外边距
+	    	return Math.max(1, Math.floor((document.body.offsetWidth + opt.gap_width) / (opt.width + opt.padding * 2 + opt.gap_width * 2)));
 	    },
 	    // 预加载图片
 		preLoadImg: function(src, callback) {
@@ -91,9 +94,9 @@
 	    	for (var i = 0; i < count; i++) {
 	    		this.columnHeights.push(0);
 	    	}
-	    	this.cells.style.width = (count * (this.cell_width) - this.opt.gap_width)
+	    	this.cells.style.width = (count * (this.cell_width) - this.opt.gap_width) + 'px';
 	    },
-	    adjustCell: function(cells){
+	    adjustCell: function(cells, reflow){
 	    	console.log(cells)
 	    	var min_index, min_height, style, img_height, img;
 	    	console.log(this.columnHeights)
@@ -102,7 +105,6 @@
 		    	img.width = this.opt.width;
 		    	((i) => {
 		    		this.preLoadImg(img.src, (width, height) =>{
-		    			cells[i].className = 'cell ready';
 		    			min_height = Math.min.apply(null, this.columnHeights);
 		    	        min_index = this.columnHeights.indexOf(min_height);
 			    		img_height = parseInt(height * this.opt.width/width);
@@ -113,6 +115,9 @@
 				    	style.left = (min_index * this.cell_width) + 'px';
 				    	this.columnHeights[min_index] += img_height + this.opt.gap_height + this.opt.padding * 2;
 				    	(this.cells.style.height = Math.max.apply(null, this.columnHeights) + 'px');
+				    	if (!reflow) {
+				    		cells[i].className = 'cell ready';
+				    	}
 			    	})
 			    })(i);
 	    	}
@@ -132,8 +137,8 @@
 	    			cell.className = 'cell pending';
 	    			cells.push(cell);
 	    			fragment.append(cell)
-	    			this.start += count;
 	    		}
+	    		this.start += count;
 	    		this.cells.appendChild(fragment);
 	    		this.adjustCell(cells)
 	    	})
@@ -144,22 +149,34 @@
 	    	}
 	    },
 	    reflowCells: function(){
-
+	    	this.count = this.getColumnCount();
+	    	if (this.columnHeights.length != this.count) {
+	    		this.resetHeight(this.count);
+	    		this.adjustCell(this.cells.children, true)
+	    	} else {
+	    		this.manageCells()
+	    	}
 	    },
 	    delayScroll: function(){
 	    	clearTimeout(this.scrollDelay);
-	    	this.scrollDelay = setTimeout(this.manageCells, 500);
+	    	this.scrollDelay = setTimeout(()=>{
+	    		this.manageCells()
+	    	}, 500);
+	    	
 	    },
-	    delayResize: ()=>{
+	    delayResize: function(){
 	    	clearTimeout(this.resizeDelay);
-	    	this.resizeDelay = setTimeout(this.reflowCells, 500);
+	    	this.resizeDelay = setTimeout(()=>{
+	    		this.reflowCells();
+	    	}, 500);
 	    },
 	    init: function(){
 			this.count = this.getColumnCount();
 			this.resetHeight(this.count);
 			this.appendCell(this.count * 2);
-			addEvent(window, 'scroll', this.delayScroll);
-			addEvent(window, 'resize', this.delayResize);
+			addEvent(window, 'scroll', this.delayScroll.bind(this));
+			addEvent(window, 'resize', this.delayResize.bind(this));
 		}
-
 	}
+	window.WaterFall = WaterFall;
+})(window);
