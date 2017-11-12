@@ -26,9 +26,9 @@
 		xhr.open(type, url, true);
 		xhr.send(params);
 		xhr.onreadystatechange = function(){
-			if (xhr.readystate === 4) {console.log(xhr)
+			if (xhr.readyState === 4) {
 				if (xhr.status === 200 || xhr.status === 304) {
-					callback(xhr.response);
+					callback(JSON.parse(xhr.response));
 				} else {
 					callback(xhr.status);
 				}
@@ -125,12 +125,14 @@
 	    appendCell: function(count) {
 	    	var fragment = document.createDocumentFragment();
 	    	var cells = [], cell, images, image;
-	    	jsonp('http://api.douban.com/v2/movie/top250',{start: this.start, count}, (res) =>{
-	    		images = res.subjects;
-	    		console.log(images)
+	    	// 跨域使用 jsonp('http://api.douban.com/v2/movie/top250',{start: this.start, count}, (res) =>{
+	    	// images = res.subjects;
+	    	ajax('get', 'http://120.77.174.93/dbmovie?start=' + this.start + '&count=' + count, (res) =>{
+	    		images = res;
 	    		for (var i = 0, len = images.length; i < len; i++) {
 	    			cell = document.createElement('div');
 	    			image = document.createElement('img');
+	    			console.log(images[i])
 	    			image.src = images[i].images.medium;
 	    			image.title = images[i].title;
 	    			cell.appendChild(image);
@@ -143,11 +145,13 @@
 	    		this.adjustCell(cells)
 	    	})
 	    },
+	    // scroll监听懒加载
 	    manageCells: function(){
 	    	if (this.cells.getBoundingClientRect().bottom < this.cells.offsetHeight) {
 	    		this.appendCell(this.count * 2);
 	    	}
 	    },
+	    // resize改变执行
 	    reflowCells: function(){
 	    	this.count = this.getColumnCount();
 	    	if (this.columnHeights.length != this.count) {
@@ -157,6 +161,7 @@
 	    		this.manageCells()
 	    	}
 	    },
+	    // 延迟scroll改变
 	    delayScroll: function(){
 	    	clearTimeout(this.scrollDelay);
 	    	this.scrollDelay = setTimeout(()=>{
@@ -164,12 +169,14 @@
 	    	}, 500);
 	    	
 	    },
+	    // 延迟resize改变
 	    delayResize: function(){
 	    	clearTimeout(this.resizeDelay);
 	    	this.resizeDelay = setTimeout(()=>{
 	    		this.reflowCells();
 	    	}, 500);
 	    },
+	    // 初始化函数
 	    init: function(){
 			this.count = this.getColumnCount();
 			this.resetHeight(this.count);
