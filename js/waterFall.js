@@ -49,19 +49,19 @@
 	}
 	function WaterFall(){
 		this.columnHeights; //计算高度数组
-		this.managing = false;
-		this.scrollDelay = null;
-		this.resizeDelay = null;
-		this.count;
-		this.start = 0;
+		this.loading = false; // 是否正在加载
+		this.scrollDelay = null; // 滚动定时器
+		this.resizeDelay = null; // resize定时器
+		this.count; // 每排数量
+		this.start = 0; // 当前图片数量
 		this.opt = {
 			 width: 190, // 图片宽度
 			 padding: 15, //cell 的内边距
 			 gap_width: 15, // cell 外边距宽
 			 gap_height: 15, // cell 外边距高
-		}
-		this.cell_width = this.opt.width + this.opt.padding * 2 + this.opt.gap_width * 2;
-		this.cells = document.getElementById('cells');
+		};
+		this.cell_width = this.opt.width + this.opt.padding * 2 + this.opt.gap_width * 2; // 图片容器的总宽度
+		this.cells = document.getElementById('cells'); // cells容器
 		this.init();
 	};
 	WaterFall.prototype = {
@@ -89,6 +89,7 @@
 				}
 			}
 		},
+		// 重新计算容器高度及每排数量
 	    resetHeight: function(count){
 	    	this.columnHeights = [];
 	    	for (var i = 0; i < count; i++) {
@@ -96,6 +97,7 @@
 	    	}
 	    	this.cells.style.width = (count * (this.cell_width) - this.opt.gap_width) + 'px';
 	    },
+	    // 处理每个cell 给他们定位
 	    adjustCell: function(cells, reflow){
 	    	console.log(cells)
 	    	var min_index, min_height, style, img_height, img;
@@ -107,7 +109,7 @@
 		    		this.preLoadImg(img.src, (width, height) =>{
 		    			min_height = Math.min.apply(null, this.columnHeights);
 		    	        min_index = this.columnHeights.indexOf(min_height);
-			    		img_height = parseInt(height * this.opt.width/width);
+			    		img_height = parseInt(height * this.opt.width / width);
 			    		console.log(img_height, this.columnHeights, min_index)
 			    		style = cells[i].style;
 				    	style.height = img_height + 'px';
@@ -122,7 +124,11 @@
 			    })(i);
 	    	}
 	    },
+	    // 加载图片放置容器
 	    appendCell: function(count) {
+	    	if (this.loading) {
+	    		return ;
+	    	}
 	    	var fragment = document.createDocumentFragment();
 	    	var cells = [], cell, images, image;
 	    	jsonp('https://api.douban.com/v2/movie/top250',{start: this.start, count}, (res) =>{
@@ -132,7 +138,6 @@
 	    		for (var i = 0, len = images.length; i < len; i++) {
 	    			cell = document.createElement('div');
 	    			image = document.createElement('img');
-	    			console.log(images[i])
 	    			image.src = images[i].images.medium;
 	    			image.title = images[i].title;
 	    			cell.appendChild(image);
@@ -142,8 +147,10 @@
 	    		}
 	    		this.start += count;
 	    		this.cells.appendChild(fragment);
-	    		this.adjustCell(cells)
-	    	})
+	    		this.adjustCell(cells);
+	    		this.loading = false; // 请求失败则不再请求咯
+	    	});
+	    	this.loading = true;
 	    },
 	    // scroll监听懒加载
 	    manageCells: function(){
@@ -157,8 +164,6 @@
 	    	if (this.columnHeights.length != this.count) {
 	    		this.resetHeight(this.count);
 	    		this.adjustCell(this.cells.children, true)
-	    	} else {
-	    		this.manageCells()
 	    	}
 	    },
 	    // 延迟scroll改变

@@ -31,3 +31,17 @@
   -o-transition: opacity 1s ease-in-out, box-shadow 300ms ease-in-out, left 700ms ease-in-out, top 700ms ease-in-out, -o-transform 700ms ease-in-out;
   transition: opacity 1s ease-in-out, box-shadow 300ms ease-in-out, left 700ms ease-in-out, top 700ms ease-in-out, transform 700ms ease-in-out;
 }
+#loader {
+  margin: 0 auto;
+  text-align: center;
+}
+
+#loader span {
+  background: url("data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwoKCggAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADGwi6MjRiSenIm9hqPOvljAOBZGmeaKqubOu6CQAh+QQJCgAAACwAAAAAEAAQAAADHAi63A5ikCEek2TalftWmPZFU/WdaKqubOu+bwIAIfkECQoAAAAsAAAAABAAEAAAAxwIutz+UIlBhoiKkorB/p3GYVN1dWiqrmzrvmkCACH5BAkKAAAALAAAAAAQABAAAAMbCLrc/jDKycQgQ8xL8OzgBg6ThWlUqq5s604JACH5BAkKAAAALAAAAAAQABAAAAMbCLrc/jDKSautYpAhpibbBI7eOEzZ1l1s6yoJACH5BAkKAAAALAAAAAAQABAAAAMaCLrc/jDKSau9OOspBhnC5BHfRJ7iOXAe2CQAIfkECQoAAAAsAAAAABAAEAAAAxoIutz+MMpJ6xSDDDEz0dMnduJwZZulrmzbJAAh+QQJCgAAACwAAAAAEAAQAAADGwi63P4wRjHIEBJUYjP/2dZJlIVlaKqubOuyCQAh+QQJCgAAACwAAAAAEAAQAAADHAi63A5ikCEek2TalftWmPZFU/WdaKqubOu+bwIAOwAAAAAAAAAAAA==") left center no-repeat;
+  display: inline-block;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 0 0 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
