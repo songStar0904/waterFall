@@ -58,7 +58,8 @@
 			 width: 190, // 图片宽度
 			 padding: 15, //cell 的内边距
 			 gap_width: 15, // cell 外边距宽
-			 gap_height: 15, // cell 外边距高
+			 gap_height: 15, // cell 外边距高,
+			 a_height: 25 //cell 中a标签的高度
 		};
 		this.cell_width = this.opt.width + this.opt.padding * 2 + this.opt.gap_width * 2; // 图片容器的总宽度
 		this.cells = document.getElementById('cells'); // cells容器
@@ -102,26 +103,24 @@
 	    	console.log(cells)
 	    	var min_index, min_height, style, img_height, img;
 	    	console.log(this.columnHeights)
-	    	for (var i = 0, len = cells.length; i < len; i++) {
+	    	for (let i = 0, len = cells.length; i < len; i++) {
 		    	img = cells[i].getElementsByTagName('img')[0];
 		    	img.width = this.opt.width;
-		    	((i) => {
-		    		this.preLoadImg(img.src, (width, height) =>{
-		    			min_height = Math.min.apply(null, this.columnHeights);
-		    	        min_index = this.columnHeights.indexOf(min_height);
-			    		img_height = parseInt(height * this.opt.width / width);
-			    		console.log(img_height, this.columnHeights, min_index)
-			    		style = cells[i].style;
-				    	style.height = img_height + 'px';
-				    	style.top = min_height + 'px';
-				    	style.left = (min_index * this.cell_width) + 'px';
-				    	this.columnHeights[min_index] += img_height + this.opt.gap_height + this.opt.padding * 2;
-				    	(this.cells.style.height = Math.max.apply(null, this.columnHeights) + 'px');
-				    	if (!reflow) {
-				    		cells[i].className = 'cell ready';
-				    	}
-			    	})
-			    })(i);
+	    		this.preLoadImg(img.src, (width, height) =>{
+	    			min_height = Math.min.apply(null, this.columnHeights);
+	    	        min_index = this.columnHeights.indexOf(min_height);
+		    		img_height = parseInt(height * this.opt.width / width) + this.opt.a_height;
+		    		console.log(img_height, this.columnHeights, min_index)
+		    		style = cells[i].style;
+			    	style.height = img_height + 'px';
+			    	style.top = min_height + 'px';
+			    	style.left = (min_index * this.cell_width) + 'px';
+			    	this.columnHeights[min_index] += img_height + this.opt.gap_height + this.opt.padding * 2;
+			    	(this.cells.style.height = Math.max.apply(null, this.columnHeights) + 'px');
+			    	if (!reflow) {
+			    		cells[i].className = 'cell ready';
+			    	}
+		    	})
 	    	}
 	    },
 	    // 加载图片放置容器
@@ -130,7 +129,7 @@
 	    		return ;
 	    	}
 	    	var fragment = document.createDocumentFragment();
-	    	var cells = [], cell, images, image;
+	    	var cells = [], cell, images, image, h2;
 	    	jsonp('https://api.douban.com/v2/movie/top250',{start: this.start, count}, (res) =>{
 	    	    images = res.subjects;
 	    	// ajax('get', 'http://120.77.174.93/dbmovie?start=' + this.start + '&count=' + count, (res) =>{
@@ -138,9 +137,12 @@
 	    		for (var i = 0, len = images.length; i < len; i++) {
 	    			cell = document.createElement('div');
 	    			image = document.createElement('img');
+	    			h2 = document.createElement('h2');
 	    			image.src = images[i].images.medium;
 	    			image.title = images[i].title;
+	    			h2.innerHTML = `<a>${images[i].title}</a><span class="rate">评分：${images[i].rating.average}`;
 	    			cell.appendChild(image);
+	    			cell.appendChild(h2);
 	    			cell.className = 'cell pending';
 	    			cells.push(cell);
 	    			fragment.append(cell)

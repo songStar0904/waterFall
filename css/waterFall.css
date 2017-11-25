@@ -9,6 +9,7 @@
   background: #fff;
   border: 1px solid #ddd;
   padding: 14px;
+  cursor: pointer;
 }
 #cells .cell img {
   display: block;
@@ -44,4 +45,26 @@
   padding: 0 0 0 18px;
   font-weight: bold;
   text-transform: uppercase;
+}
+
+.cell h2 {
+  display: block;
+  font-size: 12px;
+  margin-top: 10px;
+  height: 14px;
+  line-height: 14px;
+  color: #666;
+  overflow: hidden;
+}
+
+.cell .rate {
+  float: right;
+}
+.cell a {
+  float: left;
+  text-decoration: none;
+}
+
+.cell a:hover {
+  color: #f3c;
 }
